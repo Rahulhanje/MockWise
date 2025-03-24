@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     )).join('');
 
     const { object: { totalScore, categoryScores, strengths, areasForImprovement, finalAssessment } } = await generateObject({
-      model: google("gemini-2.0-flash", {
+      model: google("gemini-2.0-flash-001", {
         structuredOutputs: false,
       }),
       schema: feedbackSchema,

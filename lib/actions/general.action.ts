@@ -103,3 +103,26 @@ export async function getInterviewsByUserId(
   //     };
   //   }
   // }
+
+  export async function getFeedbackByInterviewId(
+    params: GetFeedbackByInterviewIdParams
+  ): Promise<Feedback | null> {
+
+    const { interviewId, userId} = params;
+  
+    const feedback = await db
+      .collection("feedback")
+      .where("interviewId", "==", interviewId)
+      .where("userId", "==", userId)
+      .limit(1)
+      .get();
+    
+    if(!feedback.docs.length) return null;
+
+    const feedbackDoc = feedback.docs[0];
+
+    return {
+      ...feedbackDoc.data(),
+      id: feedbackDoc.id,
+    } as Feedback;
+  }
