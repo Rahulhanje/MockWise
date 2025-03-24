@@ -78,7 +78,6 @@ const Agent = ({ userName, userId, type, interviewId, questions }: AgentProps) =
         try {
             setIsGenerating(true);
             
-            // Use a server action to create feedback instead of direct API call
             const response = await fetch('/api/feedback', {
                 method: 'POST',
                 headers: {
@@ -119,6 +118,7 @@ const Agent = ({ userName, userId, type, interviewId, questions }: AgentProps) =
     const handleCall = async () => {
         setCallStatus(CallStatus.CONNECTING);
         if (type === 'generate') {
+            console.log("Starting call with workflow ID:", process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID);
             await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
                 variableValues: {
                     username: userName,
@@ -181,9 +181,7 @@ const Agent = ({ userName, userId, type, interviewId, questions }: AgentProps) =
             <div className="w-full flex justify-center">
                 {callStatus !== 'ACTIVE' ? (
                     <button className="relative btn-call" onClick={handleCall}>
-                        <span className={cn('absolute animate-ping rounded-full opacity-75', callStatus !== 'CONNECTING' && 'hidden')}
-                        />
-
+                        <span className={cn('absolute animate-ping rounded-full opacity-75', callStatus !== 'CONNECTING' && 'hidden')} />
                         <span>
                             {isCallInactiveOrFinished ? 'Call' : '. . .'}
                         </span>
