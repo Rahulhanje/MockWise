@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { vapi } from '@/lib/vapi.sdk';
+import { interviewer } from "@/constants";
 
 enum CallStatus {
     INACTIVE = 'INACTIVE',
@@ -59,7 +60,9 @@ const Agent = ({ userName, userId, type,interviewId,questions }: AgentProps) => 
     }, [])
 
     const handleGenerateFeedback = async (messages: SavedMessage[]) => {
+        
 
+        //todo 
         console.log("generate feedback here.")
         const {success,id}={
             success:true,
@@ -88,13 +91,29 @@ const Agent = ({ userName, userId, type,interviewId,questions }: AgentProps) => 
 
     const handleCall = async () => {
         setCallStatus(CallStatus.CONNECTING);
-        console.log("WORKFLOW ID", process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID);
+        // console.log("WORKFLOW ID", process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID);
+        if(type==='generate'){
         await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID, {
             variableValues: {
                 username: userName,
                 userid: userId,
             }
         })
+    }else{
+        let formatedQuestions='';
+        
+          if(questions){
+            formatedQuestions=questions.map((question)=>{
+              `-${question}`;
+            }).join('\n');
+          }
+
+          await vapi.start(interviewer,{
+            variableValues:{
+                questions:formatedQuestions,
+            }
+          })
+    } 
     }
 
     const handleDisconnect = async () => {
