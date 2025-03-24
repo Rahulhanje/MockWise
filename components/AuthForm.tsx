@@ -86,15 +86,15 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
     return (
         <div className="card-border lg:min-w-[566px]">
-            <div className="flex flex-col gap-6 card py-14 px-10">
-                <div className="flex flex-row gap-2 justify-center">
+            <div className="flex flex-col gap-6 card py-14 px-10 items-center">
+                <div className="flex flex-col gap-2 justify-center items-center">
                     <Image
-                        src="/logo.svg"
+                        src="/logo.png"
                         alt="logo"
-                        height={32}
-                        width={38}
+                        height={100}
+                        width={100}
                     />
-                    <h2 className="text-primary-100">PrepWise</h2>
+                    <h2 className="text-primary-100">MockWise</h2>
                 </div>
 
                 <h3>Practice job interview with AI</h3>
@@ -131,11 +131,11 @@ const AuthForm = ({ type }: { type: FormType }) => {
                 
                 <p className="text-center">
                     {isSignIn ? 'No account yet?' : 'Have an account already?'}
-                    <Link href={!isSignIn ? '/sign-in' : '/sign-up'} className="font-bold text-user-primary ml-1">
+                    <Link href={!isSignIn ? '/sign-in' : '/sign-up'} className="font-bold text-user-primary ml-1 hover:text-blue-500">
                         {!isSignIn ? "Sign in" : 'Sign up'}
                     </Link>
                     {
-                        isSignIn ? (<span><br/><Link href={'/forgotpassword'} className="">Forgot Password ?</Link></span>) : ' '
+                        isSignIn ? (<span><br/><Link href={'/forgotpassword'} className="pt-15 hover:text-blue-500">Forgot Password ?</Link></span>) : ' '
                     }
                 </p>
             </div>

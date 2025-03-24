@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 const SignOutButton = () => {
   return (
-    <Button onClick={async () => await signOut()}>
+    <Button onClick={async () => await signOut()} className='hover:bg-red-500 hover:text-white'>
       Sign Out
     </Button>
   );

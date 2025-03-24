@@ -22,15 +22,15 @@ export default async function page() {
     <>
     <section className="card-cta">
       <div className="flex flex-col gap-6 max-w-lg">
-        <h2>Get Intrview-Ready with AI_POwered Practice And Feedback</h2>
-        <p className="text-lg">Practice on real intrvierw questions and get instant feedback on your interview skills</p>
+        <h2>Ace Your Interviews with  AI-Powered Practice & Instant Feedback!</h2>
+        <p className="text-lg">Sharpen your interview skills with real-world questions and AI-driven feedback—boost your confidence and land your dream job!</p>
         <Button asChild className="btn-primary max-sm:w-full">
           <Link href="/interview">Start an Intrview</Link>
         </Button>
       </div>
-      <Image src="/robot.png" alt="robot" width={400} height={400} className="max-sm:hidden" />
+      <Image src="/homepage_animation.gif" alt="robot" width={400} height={400} className="max-sm:hidden" />
     </section>
-    <section className="flex flex-col gap-6 mt-8">
+    <section className="flex flex-col gap-6 mt-8 mb-10">
       <h2>Your Intrviews</h2>
 
 
@@ -45,7 +45,7 @@ export default async function page() {
        }
       </div>
     </section>
-    <section className="flex flex-col gap-6 mt-8">
+    {/* <section className="flex flex-col gap-6 mt-8">
       <h2>Take an Interview</h2>
       <div className="interviews-section">
       { hasUpcommingInterviews?(
@@ -57,7 +57,7 @@ export default async function page() {
       )
        }
       </div>
-    </section>
+    </section> */}
     </>
   );
 }
