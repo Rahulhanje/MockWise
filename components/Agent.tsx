@@ -19,11 +19,27 @@ interface SavedMessage {
     content: string;
 }
 
-const Agent = ({ userName, userId, type,interviewId,questions }: AgentProps) => {
+interface Message {
+    type: string;
+    transcriptType?: string;
+    role: 'user' | 'system' | 'assistant';
+    transcript: string;
+}
+
+interface AgentProps {
+    userName: string;
+    userId: string;
+    type: 'generate' | 'interview';
+    interviewId?: string;
+    questions?: string[];
+}
+
+const Agent = ({ userName, userId, type, interviewId, questions }: AgentProps) => {
     const router = useRouter();
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
     const [messages, setMessages] = useState<SavedMessage[]>([]);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     useEffect(() => {
         const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
@@ -32,7 +48,6 @@ const Agent = ({ userName, userId, type,interviewId,questions }: AgentProps) => 
         const onMessage = (message: Message) => {
             if (message.type === 'transcript' && message.transcriptType === 'final') {
                 const newMessage = { role: message.role, content: message.transcript }
-
                 setMessages((prev) => [...prev, newMessage]);
             }
         }
@@ -60,65 +75,75 @@ const Agent = ({ userName, userId, type,interviewId,questions }: AgentProps) => 
     }, [])
 
     const handleGenerateFeedback = async (messages: SavedMessage[]) => {
-        
-
-        //todo 
-        console.log("generate feedback here.")
-        const {success,id}={
-            success:true,
-            id:'feedback-id'
-        }
-
-        if(success && id){
-            router.push(`/interview/${interviewId}/feedback`);
-        }else{
-            console.log('Error Saving feedback');
-            router.push('/');
-        }
-    }
-
-    useEffect(() => {
-        if(callStatus===CallStatus.FINISHED){
-            if(type ==='generate'){
+        try {
+            setIsGenerating(true);
+            
+            // Use a server action to create feedback instead of direct API call
+            const response = await fetch('/api/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    interviewId,
+                    userId,
+                    transcript: messages
+                }),
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.feedbackId) {
+                router.push(`/interview/${interviewId}/feedback`);
+            } else {
+                console.error('Error saving feedback');
                 router.push('/');
             }
-            else{
+        } catch (error) {
+            console.error('Failed to generate feedback:', error);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    useEffect(() => {
+        if (callStatus === CallStatus.FINISHED) {
+            if (type === 'generate') {
+                router.push('/');
+            } else {
                 handleGenerateFeedback(messages);
             }
         }
-        if (callStatus === CallStatus.FINISHED) router.push('/');
-    }, [messages, callStatus, type, userId]);
+    }, [messages, callStatus, type, userId, interviewId, router]);
 
     const handleCall = async () => {
         setCallStatus(CallStatus.CONNECTING);
-        // console.log("WORKFLOW ID", process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID);
-        if(type==='generate'){
-        await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID, {
-            variableValues: {
-                username: userName,
-                userid: userId,
+        if (type === 'generate') {
+            await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
+                variableValues: {
+                    username: userName,
+                    userid: userId,
+                }
+            });
+        } else {
+            let formatedQuestions = '';
+            
+            if (questions) {
+                formatedQuestions = questions.map((question) => 
+                    `-${question}`
+                ).join('\n');
             }
-        })
-    }else{
-        let formatedQuestions='';
-        
-          if(questions){
-            formatedQuestions=questions.map((question)=>{
-              `-${question}`;
-            }).join('\n');
-          }
 
-          await vapi.start(interviewer,{
-            variableValues:{
-                questions:formatedQuestions,
-            }
-          })
-    } 
+            await vapi.start(interviewer, {
+                variableValues: {
+                    questions: formatedQuestions,
+                }
+            });
+        } 
     }
 
     const handleDisconnect = async () => {
         setCallStatus(CallStatus.FINISHED);
-
         vapi.stop();
     }
 
@@ -172,4 +197,5 @@ const Agent = ({ userName, userId, type,interviewId,questions }: AgentProps) => 
         </>
     )
 }
-export default Agent
+
+export default Agent;
