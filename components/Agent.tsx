@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { vapi } from '@/lib/vapi.sdk';
 import { interviewer } from "@/constants";
+import { LuPhoneCall } from "react-icons/lu";
 
 enum CallStatus {
     INACTIVE = 'INACTIVE',
@@ -183,12 +184,12 @@ const Agent = ({ userName, userId, type, interviewId, questions }: AgentProps) =
                     <button className="relative btn-call" onClick={handleCall}>
                         <span className={cn('absolute animate-ping rounded-full opacity-75', callStatus !== 'CONNECTING' && 'hidden')} />
                         <span>
-                            {isCallInactiveOrFinished ? 'Call' : '. . .'}
+                            {isCallInactiveOrFinished ? <span className="flex justify-center items-center gap-2"><LuPhoneCall  size={15}/>Call</span> : '. . .'}
                         </span>
                     </button>
                 ) : (
                     <button className="btn-disconnect" onClick={handleDisconnect}>
-                        End
+                        End the Interview
                     </button>
                 )}
             </div>
