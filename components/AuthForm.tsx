@@ -3,17 +3,20 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { Button } from "@/components/ui/button"
-import { Form} from "@/components/ui/form"
+import { Form } from "@/components/ui/form"
 import Image from "next/image";
 import Link from "next/link";
-import {toast} from "sonner";
+import { toast } from "sonner";
 import FormField from "@/components/FormField";
-import {useRouter} from "next/navigation";
-import {createUserWithEmailAndPassword, signInWithEmailAndPassword} from "@firebase/auth";
-import {auth} from "@/firebase/client";
-import {signIn, signUp} from "@/lib/actions/auth.action";
+import { useRouter } from "next/navigation";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "@firebase/auth";
+import { auth } from "@/firebase/client";
+import { signIn, signUp } from "@/lib/actions/auth.action";
+import { useState } from "react"
+import { LuLoader } from "react-icons/lu"
 
 const authFormSchema = (type: FormType) => {
     return z.object({
@@ -26,7 +29,7 @@ const authFormSchema = (type: FormType) => {
 const AuthForm = ({ type }: { type: FormType }) => {
     const router = useRouter();
     const formSchema = authFormSchema(type);
-
+    const [isLoading, setIsLoading] = useState(false);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -38,19 +41,21 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
-            if(type === 'sign-up') {
+            if (type === 'sign-up') {
                 const { name, email, password } = values;
 
                 const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
 
+                setIsLoading(true);
                 const result = await signUp({
                     uid: userCredentials.user.uid,
                     name: name!,
                     email,
                     password,
                 })
+                setIsLoading(false);
 
-                if(!result?.success) {
+                if (!result?.success) {
                     toast.error('Failed to create an account. Please try again.');
                     return;
                 }
@@ -64,14 +69,16 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
                 const idToken = await userCredential.user.getIdToken();
 
-                if(!idToken) {
+                if (!idToken) {
                     toast.error('Sign in failed')
                     return;
                 }
 
+                setIsLoading(true);
                 await signIn({
                     email, idToken
                 })
+                setIsLoading(false);
 
                 toast.success('Sign in successfully.');
                 router.push('/')
@@ -94,7 +101,8 @@ const AuthForm = ({ type }: { type: FormType }) => {
                         height={100}
                         width={100}
                     />
-                    <h2 className="text-primary-100">MockWise</h2>
+                    <h2 className="text-primary-100">MockWise
+                    </h2>
                 </div>
 
                 <h3>Practice job interview with AI</h3>
@@ -125,17 +133,17 @@ const AuthForm = ({ type }: { type: FormType }) => {
                             type="password"
                         />
 
-                        <Button className="btn" type="submit">{isSignIn ? 'Sign in' : 'Create an Account'}</Button>
+                        <Button className="btn" type="submit">{isSignIn ? (isLoading ? 'Signing....' : 'Sign in') : (isLoading ? 'Loading...' : 'Create an Account')}</Button>
                     </form>
                 </Form>
-                
+
                 <p className="text-center">
                     {isSignIn ? 'No account yet?' : 'Have an account already?'}
                     <Link href={!isSignIn ? '/sign-in' : '/sign-up'} className="font-bold text-user-primary ml-1 hover:text-blue-500">
                         {!isSignIn ? "Sign in" : 'Sign up'}
                     </Link>
                     {
-                        isSignIn ? (<span><br/><Link href={'/forgotpassword'} className="pt-15 hover:text-blue-500">Forgot Password ?</Link></span>) : ' '
+                        isSignIn ? (<span><br /><Link href={'/forgotpassword'} className="pt-15 hover:text-blue-500">Forgot Password ?</Link></span>) : ' '
                     }
                 </p>
             </div>
